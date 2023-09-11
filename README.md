@@ -38,9 +38,14 @@ cd roof_vectorzation
 git lfs pull
 git lfs fetch --all
 git lfs pull
-conda create -n "roofvec" python=3.7.16
+conda create --name roofvec --file requirements.txt python=3.7.16
 conda activate roofvec
 pip install -r requirements.txt
 bash test.sh [testfilename]
 ```
 test.sh simply calls test.py, so you can integrate test.py into your existing Python scripts.
+If you want to retrain the model on the dataset run: 
+```bash
+bash train.sh
+```
+In case you would like to use your own dataset, simply change the "dataset path in the train.sh script (modify the --data-root parameter)" step 3 of https://github.com/svip-lab/PPGNet.git 
