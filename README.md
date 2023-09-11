@@ -29,3 +29,18 @@ Original repositories: https://github.com/SimonHensel/Vectorization-Roof-Data-Se
 - Add requirements.txt -> a lot of the old requirements seemed outdated, which ran into trouble with newer GPU
 - Add RoofGAN preprocessing, so vectorzation will be easier and more accurate
 
+## Deployment
+Overall I'm aiming to simply provide a more straightforward process to rooftop vectorisation. 
+Pipeline to setup:
+```bash
+git clone https://github.com/readmees/roof_vectorzation.git
+cd roof_vectorzation
+git lfs pull
+git lfs fetch --all
+git lfs pull
+conda create -n "roofvec" python=3.7.16
+conda activate roofvec
+pip install -r requirements.txt
+bash test.sh [testfilename]
+```
+test.sh simply calls test.py, so you can integrate test.py into your existing Python scripts.
