@@ -29,7 +29,7 @@ def graph2line(junctions, adj_mtx, threshold=0.5):
     return lines, scores
 
 
-def draw_lines(imgs, lines, scores=None, width=2):
+def draw_lines(imgs, lines, scores=None, width=2, save_lines=None):
     assert len(imgs) == len(lines)
     imgs = np.uint8(imgs)
     bs = len(imgs)
@@ -46,6 +46,13 @@ def draw_lines(imgs, lines, scores=None, width=2):
         img = img.copy()
         for (x1, y1, x2, y2), c in zip(line, score):
             pt1, pt2 = (x1, y1), (x2, y2)
+            if save_lines:
+                print('hmm')
+                # Open (or create) the text file in append mode
+                with open(f'{save_lines}_lines.txt', 'a') as f:
+                    # Write the variable's value followed by a newline
+                    f.write(f'point1:{pt1}, point2:{pt2}, score:{c}\n')
+            pt1, pt2 = (round(x1), round(y1)), (round(x2), round(y2))
             c = tuple(cv2.applyColorMap(np.array(c * 255, dtype=np.uint8), cv2.COLORMAP_JET).flatten().tolist())
             img = cv2.line(img, pt1, pt2, c, width)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -54,7 +61,7 @@ def draw_lines(imgs, lines, scores=None, width=2):
     return res
 
 
-def draw_jucntions(hms, junctions):
+def draw_jucntions(hms, junctions, save_junction=None):
     assert len(hms) == len(junctions)
     if hms.ndim == 3:
         imgs = np.uint8(hms * 255)
@@ -76,7 +83,12 @@ def draw_jucntions(hms, junctions):
         img = img.copy()
         for (x, y), c in zip(junc, score):
             c = tuple(cv2.applyColorMap(np.array(c * 255, dtype=np.uint8), cv2.COLORMAP_JET).flatten().tolist())
-            cv2.circle(img, (x, y), 5, c, thickness=2)
+            if save_junction:
+                # Open (or create) the text file in append mode
+                with open(f'{save_junction}_junctions.txt', 'a') as f:
+                    # Write the variable's value followed by a newline
+                    f.write(f'x:{x}, y:{y}, score:{c}\n')
+            cv2.circle(img, (round(x), round(y)), 5, c, thickness=2)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         res.append(th.from_numpy(img.transpose((2, 0, 1))))
 

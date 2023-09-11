@@ -83,12 +83,15 @@ class LSD(object):
         self.block_size = block_inference_size
         self.max_junctions = max_junctions
         self.img_size = img_size
-
+        self.last_epoch = states['last_epoch']
     def end(self):
         self.writer.close()
         return "command queue finished."
 
     def test(self, path_to_image):
+        # fn to save image with lines and points and coordinate files
+        fn = f'{path_to_image.rsplit(".", 1)[0]}_epoch{self.last_epoch}'
+
         # main loop
         torch.set_grad_enabled(False)
         print(f"test for image: {path_to_image}", flush=True)
@@ -114,14 +117,14 @@ class LSD(object):
         junctions_pred = junc_pred.cpu().numpy()
         adj_mtx = adj_mtx_pred.cpu().numpy()
 
-        img_with_junc = draw_jucntions(img, junctions_pred)
+        img_with_junc = draw_jucntions(img, junctions_pred, save_junction=fn)
         img_with_junc = img_with_junc[0].numpy()[None]
         img_with_junc = img_with_junc[:, ::-1, :, :]
         lines_pred, score_pred = graph2line(junctions_pred, adj_mtx)
-        vis_line_pred = draw_lines(img_with_junc, lines_pred, score_pred)[0]
+        vis_line_pred = draw_lines(img_with_junc, lines_pred, score_pred, save_lines=fn)[0]
         vis_line_pred = vis_line_pred.permute(1, 2, 0).numpy()
 
-        cv2.imshow("result", vis_line_pred)
+        cv2.imwrite(f"{fn}.png", vis_line_pred)
 
 
 if __name__ == "__main__":
