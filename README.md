@@ -27,8 +27,10 @@ Original repositories: https://github.com/SimonHensel/Vectorization-Roof-Data-Se
 (Future) differences with with original repositories:
 - Add trained models on roof data set
 - Add requirements.txt -> a lot of the old requirements seemed outdated, which ran into trouble with newer GPU
-- Add RoofGAN preprocessing, so vectorzation will be easier and more accurate
-
+- Add extra preprocessing and use those preprocessed images for more transfer learning, so vectorzation will be easier and more accurate
+- Resize images, lines and coordinates to original size
+- Keep logs of coordinates for developers
+  
 ## Deployment
 Overall I'm aiming to simply provide a more straightforward process to rooftop vectorisation. 
 Pipeline to setup:
