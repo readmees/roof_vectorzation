@@ -4,6 +4,9 @@ import functools
 import torch as th
 import cv2
 from numba import jit
+import matplotlib.pyplot as plt
+import re
+import matplotlib.pyplot as plt
 
 
 def graph2line(junctions, adj_mtx, threshold=0.5):
@@ -28,8 +31,12 @@ def graph2line(junctions, adj_mtx, threshold=0.5):
 
     return lines, scores
 
+def transform_to_original_coordinates(x_resized, y_resized, width_scale, height_scale):
+    x_original = x_resized * width_scale
+    y_original = y_resized * height_scale
+    return x_original, y_original
 
-def draw_lines(imgs, lines, scores=None, width=2, save_lines=None):
+def draw_lines(imgs, lines, scores=None, width=2, save_lines=None, scales=(1, 1)):
     assert len(imgs) == len(lines)
     imgs = np.uint8(imgs)
     bs = len(imgs)
@@ -45,9 +52,10 @@ def draw_lines(imgs, lines, scores=None, width=2, save_lines=None):
             score = scores[b]
         img = img.copy()
         for (x1, y1, x2, y2), c in zip(line, score):
-            pt1, pt2 = (x1, y1), (x2, y2)
             if save_lines:
-                print('hmm')
+                # Resize x and y scales = (width_scale, height_scale)
+                pt1 = transform_to_original_coordinates(x1, y1, scales[0], scales[1])
+                pt2 = transform_to_original_coordinates(x2, y2, scales[0], scales[1])
                 # Open (or create) the text file in append mode
                 with open(f'{save_lines}_lines.txt', 'a') as f:
                     # Write the variable's value followed by a newline
@@ -61,7 +69,7 @@ def draw_lines(imgs, lines, scores=None, width=2, save_lines=None):
     return res
 
 
-def draw_jucntions(hms, junctions, save_junction=None):
+def draw_jucntions(hms, junctions, save_junction=None, scales=(1,1)):
     assert len(hms) == len(junctions)
     if hms.ndim == 3:
         imgs = np.uint8(hms * 255)
@@ -82,18 +90,64 @@ def draw_jucntions(hms, junctions, save_junction=None):
             score = [1.] * len(junc)
         img = img.copy()
         for (x, y), c in zip(junc, score):
+     
+            
             c = tuple(cv2.applyColorMap(np.array(c * 255, dtype=np.uint8), cv2.COLORMAP_JET).flatten().tolist())
             if save_junction:
                 # Open (or create) the text file in append mode
                 with open(f'{save_junction}_junctions.txt', 'a') as f:
                     # Write the variable's value followed by a newline
-                    f.write(f'x:{x}, y:{y}, score:{c}\n')
+                    # Resize x and y scales = (width_scale, height_scale)
+                    xt, yt = transform_to_original_coordinates(x, y, scales[0], scales[1])
+                    f.write(f'x:{xt}, y:{yt}, score:{c}\n')
             cv2.circle(img, (round(x), round(y)), 5, c, thickness=2)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         res.append(th.from_numpy(img.transpose((2, 0, 1))))
 
     return res
 
+def plot_from_files(junction_file_path, line_file_path, img_path, output_path):
+    # Extracting junctions
+    junctions = []
+    try:
+        with open(junction_file_path, 'r') as f:
+            for line in f:
+                x = float(re.search(r'x:(.*?),', line).group(1))
+                y = float(re.search(r'y:(.*?),', line).group(1))
+                junctions.append((x, y))
+    except FileNotFoundError:
+        pass
+
+    # Extracting lines
+    lines = []
+    try:    
+        with open(line_file_path, 'r') as f:
+            for line in f:
+                point1 = re.search(r'point1:\((.*?), (.*?)\)', line)
+                point2 = re.search(r'point2:\((.*?), (.*?)\)', line)
+                x1, y1 = float(point1.group(1)), float(point1.group(2))
+                x2, y2 = float(point2.group(1)), float(point2.group(2))
+                lines.append(((x1, y1), (x2, y2)))
+    except FileNotFoundError:
+        pass
+    
+    # Load and display image
+    img = cv2.imread(img_path)
+    plt.imshow(img)
+
+    # Plot the junctions and lines on top of the image
+    if lines:
+        for (x1, y1), (x2, y2) in lines:
+            plt.plot([x1, x2], [y1, y2], 'b-')
+    if junctions:
+        for x, y in junctions:
+            plt.scatter(x, y, c='red')
+
+    if not junctions and not lines:
+        print('No lines or junctions are found :(')
+    plt.axis('off')
+    plt.savefig(output_path, bbox_inches='tight', pad_inches=0, dpi=300)
+    plt.close()  # Close the plot to free up memory
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""

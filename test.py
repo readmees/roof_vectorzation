@@ -13,7 +13,7 @@ import numpy as np
 from data.sist_line import SISTLine
 import data.transforms as tf
 from models.lsd_test import LSDTestModule
-from utils import AverageMeter, graph2line, draw_lines, draw_jucntions
+from utils import AverageMeter, graph2line, draw_lines, draw_jucntions, plot_from_files
 
 # tensorboard
 from tensorboardX import SummaryWriter
@@ -77,13 +77,16 @@ class LSD(object):
             print(f"resume traning from epoch {states['last_epoch']}")
             self.model.load_state_dict(states["state_dict"])
             self.states.update(states)
+            self.last_epoch = states['last_epoch']
+        else:
+            self.last_epoch = 0
 
         self.vis_junc_th = vis_junc_th
         self.vis_line_th = vis_line_th
         self.block_size = block_inference_size
         self.max_junctions = max_junctions
         self.img_size = img_size
-        self.last_epoch = states['last_epoch']
+        
     def end(self):
         self.writer.close()
         return "command queue finished."
@@ -102,6 +105,15 @@ class LSD(object):
             model = self.model.eval()
 
         img = cv2.imread(path_to_image)
+
+        # Use the original shape so we can resize the results in the end
+        original_size = img.shape[:2]
+        original_width = original_size[1]
+        original_height = original_size[0]
+        width_scale = original_width / self.img_size
+        height_scale = original_height / self.img_size
+        self.scales = (width_scale, height_scale)
+
         img = cv2.resize(img, (self.img_size, self.img_size))
         img_reverse = img[..., [2, 1, 0]]
         img = torch.from_numpy(img_reverse).float().permute(2, 0, 1).unsqueeze(0)
@@ -117,14 +129,16 @@ class LSD(object):
         junctions_pred = junc_pred.cpu().numpy()
         adj_mtx = adj_mtx_pred.cpu().numpy()
 
-        img_with_junc = draw_jucntions(img, junctions_pred, save_junction=fn)
+        img_with_junc = draw_jucntions(img, junctions_pred, save_junction=fn, scales=self.scales)
         img_with_junc = img_with_junc[0].numpy()[None]
         img_with_junc = img_with_junc[:, ::-1, :, :]
         lines_pred, score_pred = graph2line(junctions_pred, adj_mtx)
-        vis_line_pred = draw_lines(img_with_junc, lines_pred, score_pred, save_lines=fn)[0]
-        vis_line_pred = vis_line_pred.permute(1, 2, 0).numpy()
+        draw_lines(img_with_junc, lines_pred, score_pred, 
+                    save_lines=fn, scales=self.scales)[0]
 
-        cv2.imwrite(f"{fn}.png", vis_line_pred)
+        # Txt files are created, use matplotlib to save the original image with the coordinates
+        img = cv2.imread(path_to_image)
+        plot_from_files(fn+'_junctions.txt', fn+'_lines.txt', path_to_image.replace('_edge', ''), fn+'_annotated.png')
 
 
 if __name__ == "__main__":
