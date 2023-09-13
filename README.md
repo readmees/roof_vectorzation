@@ -33,16 +33,12 @@ Original repositories: https://github.com/SimonHensel/Vectorization-Roof-Data-Se
   
 ## Deployment
 Overall I'm aiming to simply provide a more straightforward process to rooftop vectorisation. 
-Pipeline to setup:
+Pipeline to setup (requires Miniconda):
 ```bash
 git clone https://github.com/readmees/roof_vectorzation.git
 cd roof_vectorzation
-git lfs pull
-git lfs fetch --all
-git lfs pull
-conda create --name roofvec --file requirements.txt python=3.7.16
-conda activate roofvec
-pip install -r requirements.txt
+sudo apt-get install git-lfs
+bash install.sh
 bash test.sh [testfilename]
 ```
 test.sh simply calls test.py, so you can integrate test.py into your existing Python scripts.

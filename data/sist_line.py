@@ -6,7 +6,7 @@ from data.line_graph import LineGraph
 from glob import glob
 from PIL import Image
 from data.utils import gen_gaussian_map
-
+import cv2
 
 class SISTLine(data.Dataset):
     def __init__(self, data_root, transforms, phase="train", sigma_junction=3., max_junctions=512):
@@ -20,7 +20,7 @@ class SISTLine(data.Dataset):
     def __getitem__(self, item):
         img = Image.open(os.path.join(self.data_root, self.img[item]))
         ori_w, ori_h = img.size
-        
+
         lg = LineGraph().load(os.path.join(self.data_root, self.img[item][:-4] + ".lg"))
         num_junc = lg.num_junctions
         # assert num_junc <= self.max_junctions, f"{(item, num_junc)}"
@@ -52,6 +52,9 @@ class SISTLine(data.Dataset):
         assert cur_h == cur_w
         line_map = lg.line_map(cur_h, cur_w / ori_w, cur_h / ori_h, line_width=self.sigma_junction)
         # print(f"gaussian time: {time() - tic:.4f}")
+        
+        # make image color (needed for magnitudes)
+        img = cv2.cvtColor(np.asarray(img),cv2.COLOR_GRAY2RGB)
 
         img = np.array(np.asarray(img)[:, :, ::-1])
         img = th.from_numpy(img).permute(2, 0, 1)

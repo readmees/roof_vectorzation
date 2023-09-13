@@ -3,8 +3,8 @@ python main.py \
 --backbone-kwargs '{"encoder_weights": "ckpt/backbone/encoder_epoch_20.pth", "decoder_weights": "ckpt/backbone/decoder_epoch_20.pth"}' \
 --dim-embedding 256 --junction-pooling-threshold 0.2 \
 --junc-pooling-size 64 --attention-sigma 1.5 --block-inference-size 128 \
---data-root /home/ubuntu/vectorization/Vectorization-Roof-Data-Set/SimpleRoofPPGNet --junc-sigma 3 \
---batch-size 8 --gpus 0,1,2,3 --num-workers 25 --resume-epoch latest \
+--data-root data/ --junc-sigma 3 \
+--batch-size 8 --gpus 0,1,2,3,4,5,6,7,8,9,10,12 --num-workers 28 --resume-epoch latest \
 --is-train-junc True --is-train-adj True \
 --vis-junc-th 0.1 --vis-line-th 0.1 \
     - train --end-epoch 9 --solver SGD --lr 0.2 --weight-decay 5e-4 --lambda-heatmap 5. --lambda-adj 1. \
