@@ -1,6 +1,6 @@
-i#!/bin/bash
+#!/bin/bash
 
-for i in $(seq -f "%06g" 0 140)
+for i in $(seq -f "%04g" 0 17)
 do
-    bash test.sh /home/ubuntu/vectorization/roof_vectorzation/data/val/${i}.jpg
+    bash test.sh data/test/${i}.png
 done

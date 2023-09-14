@@ -4,10 +4,10 @@ python main.py \
 --dim-embedding 256 --junction-pooling-threshold 0.2 \
 --junc-pooling-size 64 --attention-sigma 1.5 --block-inference-size 128 \
 --data-root data/ --junc-sigma 3 \
---batch-size 8 --gpus 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31 --num-workers 28 --resume-epoch latest \
+--batch-size 1 --gpus 0,1,2,3,4 --num-workers 28 --resume-epoch latest \
 --is-train-junc True --is-train-adj True \
 --vis-junc-th 0.1 --vis-line-th 0.1 \
     - train --end-epoch 9 --solver SGD --lr 0.2 --weight-decay 5e-4 --lambda-heatmap 5. --lambda-adj 1. \
     - train --end-epoch 15 --solver SGD --lr 0.02 --weight-decay 5e-4 --lambda-heatmap 20. --lambda-adj 1. \
     - train --end-epoch 30 --solver SGD --lr 0.002 --weight-decay 5e-4 --lambda-heatmap 20. --lambda-adj 1. \
-    - end
+    - train --end-epoch 40 --solver SGD --lr 0.0002 --weight-decay 5e-4 --lambda-heatmap 25. --lambda-adj 1. \
