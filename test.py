@@ -137,8 +137,10 @@ class LSD(object):
                     save_lines=fn, scales=self.scales)[0]
 
         # Txt files are created, use matplotlib to save the original image with the coordinates
+        #NOTE: change path_to_image to path_to_image.replace('_enhanced', ''),
+        #if you want to show on original without "drawn" edges
         img = cv2.imread(path_to_image)
-        plot_from_files(fn+'_junctions.txt', fn+'_lines.txt', path_to_image.replace('_edge', ''), fn+'_annotated.png')
+        plot_from_files(fn+'_junctions.txt', fn+'_lines.txt', path_to_image, fn+'_annotated.png')
 
 
 if __name__ == "__main__":

@@ -20,8 +20,8 @@ from tensorboardX import SummaryWriter
 import torchvision.utils as vutils
 
 import fire
-
-
+torch.cuda.empty_cache()
+print("cache cleared")
 def weight_fn(dist_map, max_dist, mid=0.1, scale=10):
     with torch.no_grad():
         dist_map = dist_map / max_dist

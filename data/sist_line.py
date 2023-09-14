@@ -52,9 +52,6 @@ class SISTLine(data.Dataset):
         assert cur_h == cur_w
         line_map = lg.line_map(cur_h, cur_w / ori_w, cur_h / ori_h, line_width=self.sigma_junction)
         # print(f"gaussian time: {time() - tic:.4f}")
-        
-        # make image color (needed for magnitudes)
-        img = cv2.cvtColor(np.asarray(img),cv2.COLOR_GRAY2RGB)
 
         img = np.array(np.asarray(img)[:, :, ::-1])
         img = th.from_numpy(img).permute(2, 0, 1)
